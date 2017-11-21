@@ -18,7 +18,7 @@ import logging
 import uuid
 import datetime
 
-from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponseForbidden
@@ -51,7 +51,6 @@ from wger.utils.generic_views import (
 )
 from wger.utils.helpers import check_access
 from wger.weight.helpers import process_log_entries, group_log_entries
-
 
 logger = logging.getLogger(__name__)
 
@@ -204,7 +203,6 @@ def add(request, pk):
 
     # Pass the correct forms to the exercise list
     for exercise in exercise_list:
-
         form_id_from = min(exercise_list[exercise]['form_ids'])
         form_id_to = max(exercise_list[exercise]['form_ids'])
         exercise_list[exercise]['forms'] = formset[form_id_from:form_id_to + 1]

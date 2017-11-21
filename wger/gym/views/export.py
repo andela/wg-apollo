@@ -14,7 +14,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 
-import six
 import csv
 import datetime
 import logging
@@ -40,11 +39,11 @@ def users(request, gym_pk):
     gym = get_object_or_404(Gym, pk=gym_pk)
 
     if not request.user.has_perm('gym.manage_gyms') \
-            and not request.user.has_perm('gym.manage_gym'):
+        and not request.user.has_perm('gym.manage_gym'):
         return HttpResponseForbidden()
 
     if request.user.has_perm('gym.manage_gym') \
-            and request.user.userprofile.gym != gym:
+        and request.user.userprofile.gym != gym:
         return HttpResponseForbidden()
 
     # Create CSV 'file'
