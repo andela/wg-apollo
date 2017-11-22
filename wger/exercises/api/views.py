@@ -229,4 +229,3 @@ class ExerciseInfoView(viewsets.ModelViewSet):
                      'equipment',
                      'license',
                      'license_author')
-
