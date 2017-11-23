@@ -13,9 +13,11 @@
 # You should have received a copy of the GNU Affero General Public License
 
 import logging
+import json
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.utils.encoding import force_text
 
 from wger.core.forms import RegistrationForm
 from wger.core.forms import RegistrationFormNoCaptcha
@@ -118,3 +120,35 @@ class RegistrationTestCase(WorkoutManagerTestCase):
             count_after = User.objects.count()
             self.assertEqual(response.status_code, 302)
             self.assertEqual(count_before, count_after)
+
+
+class RegistrationTestCaseRest(WorkoutManagerTestCase):
+    def test_register(self):
+        url = '/api/v2/register/'
+
+        # Test for the unauthorized user
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 403)
+
+        # Test register via Rest API
+        self.user_login()
+        reg_data = dict(username='test_user', password='test_password', email='test@mail.com')
+        response = self.client.post(url, data=reg_data)
+        reply = json.loads(response.content)
+        self.assertEqual(reply['Message'], "Profile created", msg="Profile not created")
+
+        # Test username exists
+        response_post = self.client.post(url, data=reg_data)
+        self.assertEqual(response_post.status_code, 400)
+
+        # Test incomplete data
+        reg_data.pop('password')
+        response_post = self.client.post(url, data=reg_data)
+        self.assertEqual(response_post.status_code, 400)
+
+        # Invalid data missing username
+        reg_data_new = {}
+        reg_data_new['email'] = 'test_email'
+        reg_data_new['password'] = 'password'
+        response_post = self.client.post(url, data=reg_data_new)
+        self.assertEqual(response_post.status_code, 400)
