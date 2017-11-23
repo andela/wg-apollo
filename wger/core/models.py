@@ -109,6 +109,11 @@ class UserProfile(models.Model):
     The user
     '''
 
+    added_by = models.CharField(max_length=150, null=True, blank=True)
+    '''
+    Users added by external app via the rest api
+    '''
+
     gym = models.ForeignKey(Gym,
                             editable=False,
                             null=True,

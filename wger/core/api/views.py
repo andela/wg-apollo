@@ -16,9 +16,10 @@
 # along with Workout Manager.  If not, see <http://www.gnu.org/licenses/>.
 
 from django.contrib.auth.models import User
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
+from rest_framework.authtoken.models import Token
 
 from wger.core.models import (
     UserProfile,
@@ -35,8 +36,40 @@ from wger.core.api.serializers import (
     RepetitionUnitSerializer,
     WeightUnitSerializer
 )
-from wger.core.api.serializers import UserprofileSerializer
+from wger.core.api.serializers import UserSerializer, UserprofileSerializer
 from wger.utils.permissions import UpdateOnlyPermission, WgerPermission
+
+class UserApiRegistrationView(viewsets.ModelViewSet):
+    """
+    Api endpoint for user registration using API key
+    """
+    is_private = True
+    serializer_class = UserSerializer
+    ordering_fields = ('username', 'email', 'password')
+
+    def get_queryset(self):
+        '''
+        Only allow access to appropriate objects
+        '''
+
+        return User.objects.filter(username=self.request.user.username)
+
+    def create(self, request, *args, **kwargs):
+        serializer = UserSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save()
+        new_profile = User.objects.get(username=request.data.get('username'))
+        new_profile.set_password(request.data.get('password'))
+        new_profile.save()
+
+        profile = UserProfile.objects.get(user=new_profile)
+        profile.added_by = request.user.username
+        profile.save()
+
+        return Response({'Message': 'Profile created'}, status=status.HTTP_201_CREATED)
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
