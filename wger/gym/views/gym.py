@@ -41,7 +41,6 @@ from django.views.generic import (
 
 from wger.gym.forms import GymUserAddForm, GymUserPermisssionForm
 from wger.gym.helpers import (
-    get_user_last_activity,
     is_any_gym_admin,
     get_permission_list
 )
@@ -56,7 +55,6 @@ from wger.utils.generic_views import (
     WgerDeleteMixin,
     WgerMultiplePermissionRequiredMixin)
 from wger.utils.helpers import password_generator
-
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +90,7 @@ class GymUserListView(LoginRequiredMixin, WgerMultiplePermissionRequiredMixin, L
         '''
         if request.user.has_perm('gym.manage_gyms') \
             or ((request.user.has_perm('gym.manage_gym')
-                or request.user.has_perm('gym.gym_trainer'))
+                 or request.user.has_perm('gym.gym_trainer'))
                 and request.user.userprofile.gym_id == int(self.kwargs['pk'])):
             return super(GymUserListView, self).dispatch(request, *args, **kwargs)
         return HttpResponseForbidden()
@@ -332,7 +330,7 @@ class GymAddUserView(WgerFormMixin,
         # Gym managers can edit their own gym only, general gym managers
         # can edit all gyms
         if request.user.has_perm('gym.manage_gym') \
-                and not request.user.has_perm('gym.manage_gyms') \
+            and not request.user.has_perm('gym.manage_gyms') \
                 and request.user.userprofile.gym_id != int(self.kwargs['gym_pk']):
             return HttpResponseForbidden()
 
@@ -414,7 +412,7 @@ class GymUpdateView(WgerFormMixin, LoginRequiredMixin, PermissionRequiredMixin, 
         if not request.user.is_authenticated():
             return HttpResponseForbidden()
 
-        if request.user.has_perm('gym.manage_gym')\
+        if request.user.has_perm('gym.manage_gym') \
                 and not request.user.has_perm('gym.manage_gyms'):
             if request.user.userprofile.gym_id != int(self.kwargs['pk']):
                 return HttpResponseForbidden()
