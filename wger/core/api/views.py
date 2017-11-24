@@ -39,6 +39,7 @@ from wger.core.api.serializers import (
 from wger.core.api.serializers import UserSerializer, UserprofileSerializer
 from wger.utils.permissions import UpdateOnlyPermission, WgerPermission
 
+
 class UserApiRegistrationView(viewsets.ModelViewSet):
     """
     Api endpoint for user registration using API key
@@ -55,21 +56,25 @@ class UserApiRegistrationView(viewsets.ModelViewSet):
         return User.objects.filter(username=self.request.user.username)
 
     def create(self, request, *args, **kwargs):
-        serializer = UserSerializer(data=request.data)
+        if UserProfile.objects.get(user=request.user).can_add_user:
+            serializer = UserSerializer(data=request.data)
 
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer.save()
-        new_profile = User.objects.get(username=request.data.get('username'))
-        new_profile.set_password(request.data.get('password'))
-        new_profile.save()
+            serializer.save()
+            new_profile = User.objects.get(
+                username=request.data.get('username'))
+            new_profile.set_password(request.data.get('password'))
+            new_profile.save()
 
-        profile = UserProfile.objects.get(user=new_profile)
-        profile.added_by = request.user.username
-        profile.save()
+            profile = UserProfile.objects.get(user=new_profile)
+            profile.added_by = request.user.username
+            profile.save()
 
-        return Response({'Message': 'Profile created'}, status=status.HTTP_201_CREATED)
+            return Response({'Message': 'Profile created'}, status=status.HTTP_201_CREATED)
+        return Response(
+            {'Message': 'You Have no permission to add users.'}, status=status.HTTP_403_FORBIDDEN)
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):

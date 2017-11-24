@@ -22,6 +22,7 @@ from django.utils.encoding import force_text
 from wger.core.forms import RegistrationForm
 from wger.core.forms import RegistrationFormNoCaptcha
 from wger.core.tests.base_testcase import WorkoutManagerTestCase
+from wger.core.models import UserProfile
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +51,8 @@ class RegistrationTestCase(WorkoutManagerTestCase):
                                           'ALLOW_GUEST_USERS': True,
                                           'TWITTER': False}):
             response = self.client.get(reverse('core:user:registration'))
-            self.assertIsInstance(response.context['form'], RegistrationFormNoCaptcha)
+            self.assertIsInstance(
+                response.context['form'], RegistrationFormNoCaptcha)
 
     def test_register(self):
 
@@ -67,20 +69,23 @@ class RegistrationTestCase(WorkoutManagerTestCase):
         count_before = User.objects.count()
 
         # Wrong email
-        response = self.client.post(reverse('core:user:registration'), registration_data)
+        response = self.client.post(
+            reverse('core:user:registration'), registration_data)
         self.assertFalse(response.context['form'].is_valid())
         self.user_logout()
 
         # Correct email
         registration_data['email'] = 'my.email@example.com'
-        response = self.client.post(reverse('core:user:registration'), registration_data)
+        response = self.client.post(
+            reverse('core:user:registration'), registration_data)
         count_after = User.objects.count()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(count_before + 1, count_after)
         self.user_logout()
 
         # Username already exists
-        response = self.client.post(reverse('core:user:registration'), registration_data)
+        response = self.client.post(
+            reverse('core:user:registration'), registration_data)
         count_after = User.objects.count()
         self.assertFalse(response.context['form'].is_valid())
         self.assertEqual(response.status_code, 200)
@@ -88,7 +93,8 @@ class RegistrationTestCase(WorkoutManagerTestCase):
 
         # Email already exists
         registration_data['username'] = 'my.other.username'
-        response = self.client.post(reverse('core:user:registration'), registration_data)
+        response = self.client.post(
+            reverse('core:user:registration'), registration_data)
         count_after = User.objects.count()
         self.assertFalse(response.context['form'].is_valid())
         self.assertEqual(response.status_code, 200)
@@ -116,13 +122,23 @@ class RegistrationTestCase(WorkoutManagerTestCase):
                                  'g-recaptcha-response': 'PASSED', }
             count_before = User.objects.count()
 
-            response = self.client.post(reverse('core:user:registration'), registration_data)
+            response = self.client.post(
+                reverse('core:user:registration'), registration_data)
             count_after = User.objects.count()
             self.assertEqual(response.status_code, 302)
             self.assertEqual(count_before, count_after)
 
 
 class RegistrationTestCaseRest(WorkoutManagerTestCase):
+    def new_user_login(self):
+        '''
+        Login the user, by default as 'admin'
+        '''
+        # password = 'test_pass'
+        self.client.login(username='test1', password='test_pass')
+        # self.current_user = user
+        # self.current_password = password
+
     def test_register(self):
         url = '/api/v2/register/'
 
@@ -130,12 +146,34 @@ class RegistrationTestCaseRest(WorkoutManagerTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 403)
 
+        registration_data = {'username': 'test1',
+                             'password1': 'test_pass',
+                             'password2': 'test_pass',
+                             'email': 'my.email1@example.com',
+                             'g-recaptcha-response': 'PASSED', }
+        self.client.post(
+            reverse('core:user:registration'), registration_data)
+
+        user = User.objects.get(username="test1")
+        user_profile = UserProfile.objects.get(user=user)
+        user_profile.can_add_user = True
+        user_profile.save()
+
+        reg_data = dict(username='test_user',
+                        password='test_password', email='test@mail.com')
+
+
+
+        self.user_login() # this user's flag can_add_user is set to False
+        response = self.client.post(url, data=reg_data)
+        self.assertEqual(response.status_code, 403)
+
         # Test register via Rest API
-        self.user_login()
-        reg_data = dict(username='test_user', password='test_password', email='test@mail.com')
+        self.new_user_login() # this user's flag can_add_user is set to True
         response = self.client.post(url, data=reg_data)
         reply = json.loads(response.content)
-        self.assertEqual(reply['Message'], "Profile created", msg="Profile not created")
+        self.assertEqual(reply['Message'],
+                         "Profile created", msg="Profile not created")
 
         # Test username exists
         response_post = self.client.post(url, data=reg_data)
