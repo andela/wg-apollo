@@ -130,16 +130,13 @@ class RegistrationTestCase(WorkoutManagerTestCase):
 
 
 class RegistrationTestCaseRest(WorkoutManagerTestCase):
-    def new_user_login(self):
-        '''
-        Login the user, by default as 'admin'
-        '''
-        # password = 'test_pass'
-        self.client.login(username='test1', password='test_pass')
-        # self.current_user = user
-        # self.current_password = password
-
+    '''
+    Test REST api user registration
+    '''
     def test_register(self):
+        '''
+        Test the register endpoint
+        '''
         url = '/api/v2/register/'
 
         # Test for the unauthorized user
