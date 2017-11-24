@@ -107,6 +107,22 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         user = self.get_object().user
         return Response(UsernameSerializer(user).data)
 
+class ListApiUserProfileViewSet(viewsets.ModelViewSet):
+    '''
+    API endpoint for workout objects
+    '''
+    is_private = True
+    serializer_class = UserprofileSerializer
+    permission_classes = (WgerPermission, UpdateOnlyPermission)
+    ordering_fields = '__all__'
+
+    def get_queryset(self):
+        '''
+        Only allow access to appropriate objects
+        '''
+        return UserProfile.objects.filter(added_by=self.request.user.username)
+
+
 
 class LanguageViewSet(viewsets.ReadOnlyModelViewSet):
     '''
