@@ -1,5 +1,6 @@
 from wger.core.tests.base_testcase import WorkoutManagerTestCase
 
+
 class ExerciseInfoTestCase(WorkoutManagerTestCase):
     '''
     Test the Exercise Info endpoint
