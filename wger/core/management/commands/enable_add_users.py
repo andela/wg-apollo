@@ -19,10 +19,11 @@ from django.core.management.base import BaseCommand
 
 from wger.core.models import UserProfile
 
+
 class Command(BaseCommand):
     def add_arguments(self, parser):
         # Positional arguments
-        parser.add_argument('username',type=str)
+        parser.add_argument('username', type=str)
 
         # Named (optional) arguments
         parser.add_argument(
@@ -34,17 +35,15 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        #
         try:
-          user = User.objects.get(username=options['username'])
-          profile = UserProfile.objects.get(user=user)
-          if options['disable']:
-            profile.can_add_user = False
-          else: 
-            profile.can_add_user = True
-          profile.save()
-          self.stdout.write(self.style.SUCCESS("{0} can now add users via the rest api".format(options['username'])))
-        except Exception as ex:
-          self.stdout.write(self.style.WARNING(ex))
-
-
+            user = User.objects.get(username=options['username'])
+            profile = UserProfile.objects.get(user=user)
+            if options['disable']:
+                profile.can_add_user = False
+            else:
+                profile.can_add_user = True
+            profile.save()
+            self.stdout.write(self.style.SUCCESS(
+                "{0} can now add users via the rest api".format(options['username'])))
+            except Exception as ex:
+            self.stdout.write(self.style.WARNING(ex))

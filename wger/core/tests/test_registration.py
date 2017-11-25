@@ -159,14 +159,12 @@ class RegistrationTestCaseRest(WorkoutManagerTestCase):
         reg_data = dict(username='test_user',
                         password='test_password', email='test@mail.com')
 
-
-
-        self.user_login() # this user's flag can_add_user is set to False
+        self.user_login()  # this user's flag can_add_user is set to False
         response = self.client.post(url, data=reg_data)
         self.assertEqual(response.status_code, 403)
 
         # Test register via Rest API
-        self.new_user_login() # this user's flag can_add_user is set to True
+        self.new_user_login()  # this user's flag can_add_user is set to True
         response = self.client.post(url, data=reg_data)
         reply = json.loads(response.content)
         self.assertEqual(reply['Message'],

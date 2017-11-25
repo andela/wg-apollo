@@ -21,6 +21,7 @@ from django.core.urlresolvers import reverse
 from wger.core.tests.base_testcase import WorkoutManagerTestCase
 from wger.core.models import UserProfile
 
+
 class ListApiTestCaseRest(WorkoutManagerTestCase):
     '''
     Class to test if we can query all users created under a profile
@@ -53,7 +54,7 @@ class ListApiTestCaseRest(WorkoutManagerTestCase):
                         password='test_password', email='test@mail.com')
 
         # Test register via Rest API
-        self.new_user_login() # this user's flag can_add_user is set to True
+        self.new_user_login()  # this user's flag can_add_user is set to True
         response = self.client.post(url, data=reg_data)
 
         response = self.client.get(url2)
