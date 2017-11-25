@@ -58,5 +58,5 @@ class ListApiTestCaseRest(WorkoutManagerTestCase):
         response = self.client.post(url, data=reg_data)
 
         response = self.client.get(url2)
-        reply = json.loads(response.content)
+        reply = json.loads(response.content.decode('utf-8'))
         self.assertEqual(reply['count'], 1, msg="No profiles found")

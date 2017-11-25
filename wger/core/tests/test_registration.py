@@ -166,7 +166,7 @@ class RegistrationTestCaseRest(WorkoutManagerTestCase):
         # Test register via Rest API
         self.new_user_login()  # this user's flag can_add_user is set to True
         response = self.client.post(url, data=reg_data)
-        reply = json.loads(response.content)
+        reply = json.loads(response.content.decode('utf-8'))
         self.assertEqual(reply['Message'],
                          "Profile created", msg="Profile not created")
 
