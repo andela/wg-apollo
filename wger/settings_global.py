@@ -160,6 +160,7 @@ TEMPLATES = [
 
                 # Breadcrumbs
                 'django.template.context_processors.request',
+                # social auth
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
             ],
@@ -381,3 +382,7 @@ WGER_SETTINGS = {
 # google social login
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = "464097033626-7bn08davddnt1hsb6oa0n2rc2c1e8da4.apps.googleusercontent.com"
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = "eP-9EwvC2OdxTkYH0lo8K7dx"
+
+# twitter social login
+SOCIAL_AUTH_TWITTER_KEY = 't0t94wb3CPVOkB5Z9ZQwAdfNp'
+SOCIAL_AUTH_TWITTER_SECRET = 'USC8oDqCDMQZDAzFTx7vAr6UHsTHgEIKBoJWDVSvtMFcLlUg3s'
