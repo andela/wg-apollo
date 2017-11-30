@@ -510,7 +510,8 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         out = {'admins': [],
                'members': []}
 
-        for u in User.objects.select_related('usercache', 'userprofile__gym').filter(is_active=1).all():
+        for u in User.objects.select_related('usercache', 'userprofile__gym') \
+            .filter(is_active=1).all():
             out['members'].append({'obj': u,
                                    'last_log': u.usercache.last_activity})
 
@@ -547,7 +548,8 @@ class InActiveUserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView
         out = {'admins': [],
                'members': []}
 
-        for u in User.objects.select_related('usercache', 'userprofile__gym').filter(is_active=0).all():
+        for u in User.objects.select_related('usercache', 'userprofile__gym') \
+            .filter(is_active=0).all():
             out['members'].append({'obj': u,
                                    'last_log': u.usercache.last_activity})
 
