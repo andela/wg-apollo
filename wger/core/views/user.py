@@ -145,7 +145,7 @@ def trainer_login(request, user_pk):
 
     # No changing if identity is not set
     if not request.user.has_perm('gym.gym_trainer') \
-        and not request.session.get('trainer.identity'):
+            and not request.session.get('trainer.identity'):
         return HttpResponseForbidden()
 
     # Changing between trainers or managers is not allowed
@@ -158,8 +158,8 @@ def trainer_login(request, user_pk):
     # Check if we're switching back to our original account
     own = False
     if (user.has_perm('gym.gym_trainer')
-        or user.has_perm('gym.manage_gym')
-        or user.has_perm('gym.manage_gyms')):
+            or user.has_perm('gym.manage_gym')
+            or user.has_perm('gym.manage_gyms')):
         own = True
 
     # Note: it seems we have to manually set the authentication backend here
@@ -327,7 +327,7 @@ class UserDeactivateView(LoginRequiredMixin,
             return HttpResponseForbidden()
 
         if (request.user.has_perm('gym.manage_gym') or request.user.has_perm('gym.gym_trainer')) \
-            and edit_user.userprofile.gym_id != request.user.userprofile.gym_id:
+                and edit_user.userprofile.gym_id != request.user.userprofile.gym_id:
             return HttpResponseForbidden()
 
         return super(UserDeactivateView, self).dispatch(request, *args, **kwargs)
@@ -360,7 +360,7 @@ class UserActivateView(LoginRequiredMixin,
             return HttpResponseForbidden()
 
         if (request.user.has_perm('gym.manage_gym') or request.user.has_perm('gym.gym_trainer')) \
-            and edit_user.userprofile.gym_id != request.user.userprofile.gym_id:
+                and edit_user.userprofile.gym_id != request.user.userprofile.gym_id:
             return HttpResponseForbidden()
 
         return super(UserActivateView, self).dispatch(request, *args, **kwargs)
@@ -398,8 +398,8 @@ class UserEditView(WgerFormMixin,
             return HttpResponseForbidden()
 
         if user.has_perm('gym.manage_gym') \
-            and not user.has_perm('gym.manage_gyms') \
-            and user.userprofile.gym != self.get_object().userprofile.gym:
+                and not user.has_perm('gym.manage_gyms') \
+                and user.userprofile.gym != self.get_object().userprofile.gym:
             return HttpResponseForbidden()
 
         return super(UserEditView, self).dispatch(request, *args, **kwargs)
@@ -466,8 +466,8 @@ class UserDetailView(LoginRequiredMixin, WgerMultiplePermissionRequiredMixin, De
             return HttpResponseForbidden()
 
         if (user.has_perm('gym.manage_gym') or user.has_perm('gym.gym_trainer')) \
-            and not user.has_perm('gym.manage_gyms') \
-            and user.userprofile.gym != self.get_object().userprofile.gym:
+                and not user.has_perm('gym.manage_gyms') \
+                and user.userprofile.gym != self.get_object().userprofile.gym:
             return HttpResponseForbidden()
 
         return super(UserDetailView, self).dispatch(request, *args, **kwargs)
@@ -486,9 +486,9 @@ class UserDetailView(LoginRequiredMixin, WgerMultiplePermissionRequiredMixin, De
                         'last_log': logs.last()})
         context['workouts'] = out
         context['weight_entries'] = WeightEntry.objects.filter(user=self.object) \
-                                        .order_by('-date')[:5]
+            .order_by('-date')[:5]
         context['nutrition_plans'] = NutritionPlan.objects.filter(user=self.object) \
-                                         .order_by('-creation_date')[:5]
+            .order_by('-creation_date')[:5]
         context['session'] = WorkoutSession.objects.filter(user=self.object).order_by('-date')[:10]
         context['admin_notes'] = AdminUserNote.objects.filter(member=self.object)[:5]
         context['contracts'] = Contract.objects.filter(member=self.object)[:5]
@@ -511,7 +511,7 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
                'members': []}
 
         for u in User.objects.select_related('usercache', 'userprofile__gym') \
-            .filter(is_active=1).all():
+                .filter(is_active=1).all():
             out['members'].append({'obj': u,
                                    'last_log': u.usercache.last_activity})
 
@@ -548,8 +548,8 @@ class InActiveUserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView
         out = {'admins': [],
                'members': []}
 
-        for u in User.objects.select_related('usercache', 'userprofile__gym') \
-            .filter(is_active=0).all():
+        for u in User.objects.select_related('usercache', 'userprofile__gym')\
+                .filter(is_active=0).all():
             out['members'].append({'obj': u,
                                    'last_log': u.usercache.last_activity})
 
