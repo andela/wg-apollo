@@ -18,6 +18,13 @@
 
 
 {% block sidebar %}
+<h4>{% trans "Login in with your social account" %}</h4>
+<p>
+    <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-block btn-default">
+        <span class="{% fa_class 'google' %}"></span>
+        Google
+    </a>
+</p>
 <h4>{% trans "No account?" %}</h4>
 <p>
     <a href="{% url 'core:user:registration' %}" class="btn btn-block btn-default">
