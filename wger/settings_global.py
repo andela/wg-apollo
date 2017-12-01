@@ -16,6 +16,7 @@
 
 import re
 import sys
+import os
 
 '''
 This file contains the global settings that don't usually need to be changed.
@@ -341,7 +342,8 @@ else:
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('wger.utils.permissions.WgerPermission',),
     'PAGINATE_BY': 20,
-    'PAGINATE_BY_PARAM': 'limit',  # Allow client to override, using `?limit=xxx`.
+    # Allow client to override, using `?limit=xxx`.
+    'PAGINATE_BY_PARAM': 'limit',
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
@@ -380,13 +382,14 @@ WGER_SETTINGS = {
 }
 
 # google social login
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = "464097033626-7bn08davddnt1hsb6oa0n2rc2c1e8da4.apps.googleusercontent.com"
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = "eP-9EwvC2OdxTkYH0lo8K7dx"
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.getenv('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.getenv(
+    'SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
 
 # twitter social login
-SOCIAL_AUTH_TWITTER_KEY = 't0t94wb3CPVOkB5Z9ZQwAdfNp'
-SOCIAL_AUTH_TWITTER_SECRET = 'USC8oDqCDMQZDAzFTx7vAr6UHsTHgEIKBoJWDVSvtMFcLlUg3s'
+SOCIAL_AUTH_TWITTER_KEY = os.getenv('SOCIAL_AUTH_TWITTER_KEY')
+SOCIAL_AUTH_TWITTER_SECRET = os.getenv('SOCIAL_AUTH_TWITTER_SECRET')
 
 # facebook social login
-SOCIAL_AUTH_FACEBOOK_KEY = '126940018084247'
-SOCIAL_AUTH_FACEBOOK_SECRET = '7bb0aade348879b21d50c530c3959e06'
+SOCIAL_AUTH_FACEBOOK_KEY = os.getenv('SOCIAL_AUTH_FACEBOOK_KEY')
+SOCIAL_AUTH_FACEBOOK_SECRET = os.getenv('SOCIAL_AUTH_FACEBOOK_SECRET')
