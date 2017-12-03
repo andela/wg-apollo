@@ -112,7 +112,8 @@ class NutritionPlan(models.Model):
         '''
         Sums the nutritional info of all items in the plan
         '''
-        nutritional_values_canonical_form = cache.get(cache_mapper.get_nutritional_values_canonical(self.pk))
+        nutritional_values_canonical_form = cache.get(
+            cache_mapper.get_nutritional_values_canonical(self.pk))
         if not nutritional_values_canonical_form:
             use_metric = self.user.userprofile.use_metric
             unit = 'kg' if use_metric else 'lb'
@@ -159,7 +160,8 @@ class NutritionPlan(models.Model):
 
             nutritional_values_canonical_form = result
 
-            cache.set(cache_mapper.get_nutritional_values_canonical(self.pk), nutritional_values_canonical_form)
+            cache.set(cache_mapper.get_nutritional_values_canonical(self.pk), 
+                nutritional_values_canonical_form)
         return nutritional_values_canonical_form
 
     def get_closest_weight_entry(self):
@@ -697,6 +699,7 @@ def reset_nutritional_values_canonical_form(sender, **kwargs):
     '''
     sender_instance = kwargs["instance"]
     if isinstance(sender_instance, (Meal, MealItem)):
-        cache.delete(cache_mapper.get_nutritional_values_canonical(sender_instance.get_owner_object().id))
+        cache.delete(cache_mapper.get_nutritional_values_canonical(
+            sender_instance.get_owner_object().id))
     elif isinstance(sender_instance, NutritionPlan):
         cache.delete(cache_mapper.get_nutritional_values_canonical(sender_instance.id))
