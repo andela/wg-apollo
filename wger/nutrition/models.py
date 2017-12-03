@@ -41,6 +41,9 @@ from wger.utils.models import AbstractLicenseModel
 from wger.utils.units import AbstractWeight
 from wger.weight.models import WeightEntry
 
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
 MEALITEM_WEIGHT_GRAM = '1'
 MEALITEM_WEIGHT_UNIT = '2'
 
@@ -680,3 +683,20 @@ class MealItem(models.Model):
             nutritional_info[i] = Decimal(nutritional_info[i]).quantize(TWOPLACES)
 
         return nutritional_info
+
+
+@receiver(post_save, sender=NutritionPlan)
+@receiver(post_delete, sender=NutritionPlan)
+@receiver(post_save, sender=Meal)
+@receiver(post_delete, sender=Meal)
+@receiver(post_save, sender=MealItem)
+@receiver(post_delete, sender=MealItem)
+def reset_nutritional_values_canonical_form(sender, **kwargs):
+    '''
+    Reset the nutrition values canonical form in cache
+    '''
+    sender_instance = kwargs["instance"]
+    if isinstance(sender_instance, (Meal, MealItem)):
+        cache.delete(cache_mapper.get_nutritional_values_canonical(sender_instance.get_owner_object().id))
+    elif isinstance(sender_instance, NutritionPlan):
+        cache.delete(cache_mapper.get_nutritional_values_canonical(sender_instance.id))
