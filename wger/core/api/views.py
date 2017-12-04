@@ -16,9 +16,10 @@
 # along with Workout Manager.  If not, see <http://www.gnu.org/licenses/>.
 
 from django.contrib.auth.models import User
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
+from rest_framework.authtoken.models import Token
 
 from wger.core.models import (
     UserProfile,
@@ -35,8 +36,45 @@ from wger.core.api.serializers import (
     RepetitionUnitSerializer,
     WeightUnitSerializer
 )
-from wger.core.api.serializers import UserprofileSerializer
+from wger.core.api.serializers import UserSerializer, UserprofileSerializer
 from wger.utils.permissions import UpdateOnlyPermission, WgerPermission
+
+
+class UserApiRegistrationView(viewsets.ModelViewSet):
+    """
+    Api endpoint for user registration using API key
+    """
+    is_private = True
+    serializer_class = UserSerializer
+    ordering_fields = ('username', 'email', 'password')
+
+    def get_queryset(self):
+        '''
+        Only allow access to appropriate objects
+        '''
+
+        return User.objects.filter(username=self.request.user.username)
+
+    def create(self, request, *args, **kwargs):
+        if UserProfile.objects.get(user=request.user).can_add_user:
+            serializer = UserSerializer(data=request.data)
+
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            serializer.save()
+            new_profile = User.objects.get(
+                username=request.data.get('username'))
+            new_profile.set_password(request.data.get('password'))
+            new_profile.save()
+
+            profile = UserProfile.objects.get(user=new_profile)
+            profile.added_by = request.user.username
+            profile.save()
+
+            return Response({'Message': 'Profile created'}, status=status.HTTP_201_CREATED)
+        return Response(
+            {'Message': 'You Have no permission to add users.'}, status=status.HTTP_403_FORBIDDEN)
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
@@ -68,6 +106,22 @@ class UserProfileViewSet(viewsets.ModelViewSet):
 
         user = self.get_object().user
         return Response(UsernameSerializer(user).data)
+
+
+class ListApiUserProfileViewSet(viewsets.ModelViewSet):
+    '''
+    API endpoint for workout objects
+    '''
+    is_private = True
+    serializer_class = UserprofileSerializer
+    permission_classes = (WgerPermission, UpdateOnlyPermission)
+    ordering_fields = '__all__'
+
+    def get_queryset(self):
+        '''
+        Only allow access to appropriate objects
+        '''
+        return UserProfile.objects.filter(added_by=self.request.user.username)
 
 
 class LanguageViewSet(viewsets.ReadOnlyModelViewSet):
