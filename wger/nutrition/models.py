@@ -125,13 +125,13 @@ class NutritionPlan(models.Model):
                                 'fat_saturated': 0,
                                 'fibres': 0,
                                 'sodium': 0},
-                    'percent': {'protein': 0,
-                                'carbohydrates': 0,
-                                'fat': 0},
-                    'per_kg': {'protein': 0,
-                                'carbohydrates': 0,
-                                'fat': 0},
-                    }
+                      'percent': {'protein': 0,
+                                  'carbohydrates': 0,
+                                  'fat': 0},
+                      'per_kg': {'protein': 0,
+                                 'carbohydrates': 0,
+                                 'fat': 0},
+                      }
 
             # Energy
             for meal in self.meal_set.select_related():
@@ -160,8 +160,8 @@ class NutritionPlan(models.Model):
 
             nutritional_values_canonical_form = result
 
-            cache.set(cache_mapper.get_nutritional_values_canonical(self.pk), 
-                nutritional_values_canonical_form)
+            cache.set(cache_mapper.get_nutritional_values_canonical(self.pk),
+                      nutritional_values_canonical_form)
         return nutritional_values_canonical_form
 
     def get_closest_weight_entry(self):
@@ -403,8 +403,8 @@ class Ingredient(AbstractLicenseModel, models.Model):
         if isinstance(other, self.__class__):
             for i in self._meta.fields:
                 if (hasattr(self, i.name) and hasattr(other, i.name) and
-                   (getattr(self, i.name, None) != getattr(other, i.name, None))):
-                        equal = False
+                        (getattr(self, i.name, None) != getattr(other, i.name, None))):
+                    equal = False
         else:
             equal = False
         return equal
