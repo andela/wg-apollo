@@ -1,9 +1,9 @@
-.. image:: https://travis-ci.org/andela/wg-apollo.svg?branch=master
+.. image:: https://travis-ci.org/andela/wg-apollo.svg?branch=develop
     :target: https://travis-ci.org/andela/wg-apollo
     :alt: TravisCI
 
-.. image:: https://coveralls.io/repos/github/andela/wg-apollo/badge.svg?branch=master
-    :target: https://coveralls.io/github/andela/wg-apollo?branch=master
+.. image:: https://coveralls.io/repos/github/andela/wg-apollo/badge.svg?branch=develop
+    :target: https://coveralls.io/github/andela/wg-apollo?branch=develop
 
 
 Thank you for downloading wger Workout Manager. wger (ˈvɛɡɐ) is a free, open source web

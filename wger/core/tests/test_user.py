@@ -191,6 +191,62 @@ class UserListTestCase(WorkoutManagerAccessTestCase):
                  'trainer3',
                  'trainer4')
 
+    def test_inactive_users(self):
+        '''
+        Tests accessing inactive users as administrator and not accessing users as non administrator
+        '''
+        user = User.objects.get(username='trainer4')
+        user.is_active = False
+        user.save()
+        self.assertFalse(user.is_active)
+
+        for authorized_user in self.user_success:
+            self.user_login(user=authorized_user)
+
+            response = self.client.get(reverse('core:user:inactive-list'))
+            self.assertContains(response, user.username)
+
+            response = self.client.get(reverse('core:user:list'))
+            self.assertNotContains(response, user.username)
+
+            self.user_logout()
+
+        for unauthorized_user in self.user_fail:
+            self.user_login(user=unauthorized_user)
+
+            response = self.client.get(reverse('core:user:inactive-list'))
+            self.assertIn(response.status_code, (302, 403))
+
+            self.user_logout()
+
+    def test_active_users(self):
+        '''
+        Tests accessing inactive users as administrator and not accessing users as non administrator
+        '''
+        user = User.objects.get(username='trainer4')
+        user.is_active = True
+        user.save()
+        self.assertTrue(user.is_active)
+
+        for authorized_user in self.user_success:
+            self.user_login(user=authorized_user)
+
+            response = self.client.get(reverse('core:user:list'))
+            self.assertContains(response, user.username)
+
+            response = self.client.get(reverse('core:user:inactive-list'))
+            self.assertNotContains(response, user.username)
+
+            self.user_logout()
+
+        for unauthorized_user in self.user_fail:
+            self.user_login(user=unauthorized_user)
+
+            response = self.client.get(reverse('core:user:list'))
+            self.assertIn(response.status_code, (302, 403))
+
+            self.user_logout()
+
 
 class UserDetailPageTestCase(WorkoutManagerAccessTestCase):
     '''
