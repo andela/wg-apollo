@@ -16,9 +16,13 @@
 import logging
 from decimal import Decimal
 
+from django.core.cache import cache
+
 from wger.core.tests.base_testcase import WorkoutManagerTestCase
 from wger.nutrition import models
 from wger.utils.constants import TWOPLACES
+from wger.utils.cache import cache_mapper
+from wger.nutrition.models import NutritionPlan
 
 logger = logging.getLogger(__name__)
 
@@ -142,3 +146,41 @@ class NutritionalValuesCalculationsTestCase(WorkoutManagerTestCase):
         self.assertEqual(values['per_kg']['carbohydrates'], Decimal(4.96).quantize(TWOPLACES))
         self.assertEqual(values['per_kg']['fat'], Decimal(1.51).quantize(TWOPLACES))
         self.assertEqual(values['per_kg']['protein'], Decimal(4.33).quantize(TWOPLACES))
+
+
+class NutritionalCacheTestCase(WorkoutManagerTestCase):
+    """
+    Test that the nutritional information is stored in cache
+    """
+
+    def test_meal_nutritional_info_cache(self):
+        """
+        Test that the nutrition cache of the canonical form is created
+        """
+        self.assertFalse(cache.get(cache_mapper.get_nutritional_values_canonical(1)))
+
+        plan = NutritionPlan.objects.get(pk=1)
+        plan.get_nutritional_values()
+        self.assertTrue(cache.get(cache_mapper.get_nutritional_values_canonical(1)))
+
+    def test_nutrition_info_cache_save(self):
+        """
+        Test that nutritional info cache is saved
+        """
+        plan = NutritionPlan.objects.get(pk=1)
+        plan.get_nutritional_values()
+        self.assertTrue(cache.get(cache_mapper.get_nutritional_values_canonical(1)))
+
+        plan.save()
+        self.assertFalse(cache.get(cache_mapper.get_nutritional_values_canonical(1)))
+
+    def test_nutrition_info_cache_delete(self):
+        """
+        Test that the nutritional info cache is deleted correctly
+        """
+        plan = NutritionPlan.objects.get(pk=1)
+        plan.get_nutritional_values()
+        self.assertTrue(cache.get(cache_mapper.get_nutritional_values_canonical(1)))
+
+        plan.delete()
+        self.assertFalse(cache.get(cache_mapper.get_nutritional_values_canonical(1)))
