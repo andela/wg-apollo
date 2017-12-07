@@ -110,7 +110,7 @@
                 {% trans "Import from spreadsheet" %}
             </a>
         </li>
-        <li {% if active_tab == 'fitbit' %}class="active"{% endif %}>
+        <li>
             <a href="{% url 'sync_fitbit' %}">
                   <span class="{% fa_class 'upload' %}"></span>
                     {% trans "Import from Fitbit" %}
