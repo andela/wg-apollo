@@ -42,6 +42,8 @@ from wger.exercises.api import views as exercises_api_views
 from wger.nutrition.api import views as nutrition_api_views
 from wger.weight.api import views as weight_api_views
 
+from wger.core.views.user import fitbit_data_sync
+
 #
 # REST API
 #
@@ -147,6 +149,7 @@ urlpatterns = i18n_patterns(
     url(r'config/', include('wger.config.urls', namespace='config', app_name='config')),
     url(r'gym/', include('wger.gym.urls', namespace='gym', app_name='gym')),
     url(r'email/', include('wger.email.urls', namespace='email')),
+    url(r'^fitbit/', fitbit_data_sync, name='sync_fitbit'),
     url(r'^sitemap\.xml$',
         sitemap,
         {'sitemaps': sitemaps},
