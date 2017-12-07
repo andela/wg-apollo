@@ -1,0 +1,12 @@
+{% extends "base_wide.html" %}
+{% load i18n staticfiles wger_extras %}
+{% block title %}{% trans "Sync wger to fitbit" %}{% endblock %}
+{% block content %}
+<p class="text-info">To import your Fitbit weight data into Wger click the button below.
+   You will be redirected<br> to the Fitbit authorization page where you can grant Wger permission to fetch your data.
+</p>    <br>
+<a class="btn btn-lg btn-primary" href="{{fitbit_auth_link}}">
+    <i class="fa fa-sign-in"></i>&nbsp;
+    CLICK HERE TO GRANT WGER ACCESS TO YOUR FITBIT DATA
+</a>
+{% endblock %}
