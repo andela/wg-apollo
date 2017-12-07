@@ -15,3 +15,8 @@ class SocialLoginTestCase(WorkoutManagerTestCase):
         url = '/accounts/login/facebook/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
+
+    def test_twitter_login(self):
+        url = '/accounts/login/twitter/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
