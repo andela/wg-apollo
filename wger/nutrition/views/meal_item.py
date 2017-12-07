@@ -85,7 +85,7 @@ class MealItemCreateView(WgerFormMixin, CreateView):
         context = super(MealItemCreateView, self).get_context_data(**kwargs)
         if self.meal_id:
             context['form_action'] = reverse('nutrition:meal_item:add',
-                                         kwargs={'meal_id': self.meal.id})
+                                             kwargs={'meal_id': self.meal.id})
         else:
             context['form_action'] = reverse('nutrition:meal_item:add-meal',
                                              kwargs={'plan_pk': self.plan_pk})
@@ -99,7 +99,8 @@ class MealItemCreateView(WgerFormMixin, CreateView):
         '''
         if not self.meal_id:
             # meal_id not provided in form, we are creating a new meal and meal item
-            plan = get_object_or_404(NutritionPlan, pk=self.kwargs.get('plan_pk'), user=self.request.user)
+            plan = get_object_or_404(NutritionPlan, pk=self.kwargs.get('plan_pk'),
+                                     user=self.request.user)
             meal = Meal.objects.create(plan=plan, order=1)
             meal.time = form.cleaned_data['time']
             meal.save()
