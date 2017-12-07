@@ -110,6 +110,12 @@
                 {% trans "Import from spreadsheet" %}
             </a>
         </li>
+        <li {% if active_tab == 'fitbit' %}class="active"{% endif %}>
+            <a href="{% url 'sync_fitbit' %}">
+                  <span class="{% fa_class 'upload' %}"></span>
+                    {% trans "Import from Fitbit" %}
+            </a>
+        </li>
     </ul>
 </div>
 <a href="{% url 'weight:add' %}" class="btn btn-success btn-sm wger-modal-dialog">
