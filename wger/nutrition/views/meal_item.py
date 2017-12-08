@@ -73,6 +73,12 @@ class MealItemCreateView(WgerFormMixin, CreateView):
             else:
                 return HttpResponseForbidden()
         else:
+            # meal_id not provided in form, we are creating a new meal and meal item
+            plan = get_object_or_404(NutritionPlan, pk=self.kwargs.get('plan_pk'),
+                                     user=self.request.user)
+            meal = Meal.objects.create(plan=plan, order=1)
+            meal.save()
+            self.meal = meal
             return super(MealItemCreateView, self).dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
@@ -97,15 +103,10 @@ class MealItemCreateView(WgerFormMixin, CreateView):
         '''
         Manually set the corresponding meal
         '''
-        if not self.meal_id:
-            # meal_id not provided in form, we are creating a new meal and meal item
-            plan = get_object_or_404(NutritionPlan, pk=self.kwargs.get('plan_pk'),
-                                     user=self.request.user)
-            meal = Meal.objects.create(plan=plan, order=1)
-            meal.time = form.cleaned_data['time']
-            meal.save()
-            self.meal = meal
 
+        # update created meal instance with data from form
+        self.meal.time = form.cleaned_data['time']
+        # create meal item
         form.instance.meal = self.meal
         form.instance.order = 1
         return super(MealItemCreateView, self).form_valid(form)
