@@ -22,7 +22,6 @@ from django.template.context_processors import csrf
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _, ugettext_lazy
 from django.utils import translation
-from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as django_login
 from django.contrib.auth import logout as django_logout
@@ -41,7 +40,6 @@ from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMix
 from rest_framework.authtoken.models import Token
 
 from wger.utils.constants import USER_TAB
-from wger.utils.generic_views import WgerFormMixin, WgerMultiplePermissionRequiredMixin
 from wger.utils.user_agents import check_request_amazon, check_request_android
 from wger.core.forms import (
     UserPreferencesForm,
@@ -70,6 +68,8 @@ from fitbit import FitbitOauth2Client
 import os
 import requests
 import datetime
+import six
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -314,6 +314,13 @@ def preferences(request):
         return render(request, 'user/preferences.html', template_data)
 
 
+def b64encode(data):
+    if six.PY3:
+        data = data.encode('utf-8')
+    content = base64.b64encode(data).decode('utf-8')
+    return content
+
+
 @login_required
 def fitbit_data_sync(request, code=None):
     """
@@ -337,9 +344,13 @@ def fitbit_data_sync(request, code=None):
             'redirect_uri': redirect_url
         }
 
+        # encode the client id to base64 in the authorization key and set type to basic
+        encoded_client_dets = b64encode(os.getenv('FITAPP_CONSUMER_KEY') + ':' + os.getenv('FITAPP_CONSUMER_SECRET'))
+
+        # format authorization header as per fitbit guidelines
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': 'Basic MjI4RERCOmZiZjJiZGFlYjMwYjllOGI1ZmQyNmQ5Y2MxYmU4YTVh'
+            'Authorization': 'Basic ' + encoded_client_dets
         }
 
         # get user weight data from fitbit
@@ -366,30 +377,26 @@ def fitbit_data_sync(request, code=None):
                         entry = WeightEntry()
                         entry.weight = w['weight']
                         entry.user = request.user
-                        entry.date = datetime.datetime.strptime(w['date'],
-                                                                '%Y-%m-%d')
+                        entry.date = datetime.datetime.strptime(w['date'], '%Y-%m-%d')
                         entry.save()
 
-                    messages.success(request, _(
-                        'Successfully synced weight data.'))
+                    messages.success(request, _('Successfully synced weight data.'))
 
                 except Exception as error:
                     if "UNIQUE constraint failed" in str(error):
-                        messages.info(request, _(
-                            'Already synced weight data.'))
+                        messages.info(request, _('Already synced weight data.'))
                     else:
-                        messages.warning(request, _(
-                            'Could not sync the weight data.'))
+                        messages.warning(request, _('Could not sync the weight data.'))
 
-            else:
-                messages.warning(request, _('Something went wrong.'))
+        else:
+            messages.warning(request, _('Something went wrong.'))
 
-            # redirect back to app
-            template_data['fitbit_auth_link'] = \
-                fitbit_client.authorize_token_url(
-                    redirect_uri=redirect_url,
-                    prompt='consent')[0]
-            return render(request, 'user/fitbit.html', template_data)
+    # redirect back to app
+    template_data['fitbit_auth_link'] = \
+        fitbit_client.authorize_token_url(
+            redirect_uri=redirect_url,
+            prompt='consent')[0]
+    return render(request, 'user/fitbit.html', template_data)
 
 
 class UserDeactivateView(LoginRequiredMixin,
