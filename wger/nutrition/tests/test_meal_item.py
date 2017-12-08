@@ -65,9 +65,9 @@ class AddMealAndMealItemUnitTestCase(WorkoutManagerTestCase):
     '''
 
     object_class = MealItem
-    url = reverse('nutrition:meal_item:add-meal', kwargs={'plan_pk': 4})
+    url = reverse('nutrition:meal_item:add-meal', kwargs={'plan_pk': 5})
     data = {'amount': 11,
-            'ingredient': 11,
+            'ingredient': 89,
             'weight_unit': 11,
             'time': datetime.time(8, 0)}
 
