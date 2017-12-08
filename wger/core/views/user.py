@@ -344,7 +344,7 @@ def fitbit_data_sync(request, code=None):
             'redirect_uri': redirect_url
         }
 
-        # encode the client id to base64 in the authorization key and set type to basic
+        # encode the client id to base64
         encoded_client_dets = b64encode(os.getenv('FITAPP_CONSUMER_KEY') + ':' + os.getenv('FITAPP_CONSUMER_SECRET'))
 
         # format authorization header as per fitbit guidelines
