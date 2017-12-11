@@ -12,11 +12,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with Workout Manager.  If not, see <http://www.gnu.org/licenses/>.
+import datetime
 
 from django.core.urlresolvers import reverse
 
 from wger.core.tests import api_base_test
-from wger.core.tests.base_testcase import WorkoutManagerAddTestCase
+from wger.core.tests.base_testcase import WorkoutManagerAddTestCase, WorkoutManagerTestCase
 from wger.core.tests.base_testcase import WorkoutManagerEditTestCase
 from wger.nutrition.models import MealItem
 
@@ -56,6 +57,28 @@ class AddMealItemUnitTestCase(WorkoutManagerAddTestCase):
     data = {'amount': 1,
             'ingredient': 1,
             'weight_unit': 1}
+
+
+class AddMealAndMealItemUnitTestCase(WorkoutManagerTestCase):
+    '''
+    Tests adding a meal, set the amount using a unit
+    '''
+
+    object_class = MealItem
+    url = reverse('nutrition:meal_item:add-meal', kwargs={'plan_pk': 5})
+    data = {'amount': 11,
+            'ingredient': 89,
+            'weight_unit': 11,
+            'time': datetime.time(8, 0)}
+
+    def test_add_meal_and_item(self):
+        self.user_login('admin')
+
+        # create meal and item
+        response = self.client.post(self.url, self.data)
+        self.assertEqual(response.status_code, 200)
+
+        self.user_logout()
 
 
 class AddMealItemWeightTestCase(WorkoutManagerAddTestCase):
