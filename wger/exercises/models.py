@@ -35,6 +35,8 @@ from django.core.validators import MinLengthValidator
 from django.conf import settings
 
 from wger.core.models import Language
+# from wger.config.models import LanguageConfig
+# from wger.utils.language import load_item_languages
 from wger.utils.helpers import smart_capitalize
 from wger.utils.managers import SubmissionManager
 from wger.utils.models import AbstractLicenseModel, AbstractSubmissionModel
@@ -43,6 +45,9 @@ from wger.utils.cache import (
     reset_workout_canonical_form,
     cache_mapper
 )
+
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 
 logger = logging.getLogger(__name__)
@@ -428,10 +433,10 @@ class ExerciseImage(AbstractSubmissionModel, AbstractLicenseModel, models.Model)
                 .filter(is_main=False) \
                 .count():
 
-                image = ExerciseImage.objects.accepted() \
-                    .filter(exercise=self.exercise, is_main=False)[0]
-                image.is_main = True
-                image.save()
+            image = ExerciseImage.objects.accepted() \
+                .filter(exercise=self.exercise, is_main=False)[0]
+            image.is_main = True
+            image.save()
 
     def get_owner_object(self):
         '''
@@ -505,3 +510,8 @@ class ExerciseComment(models.Model):
         Comment has no owner information
         '''
         return False
+
+
+@receiver(post_delete, sender=Muscle)
+def reset_cache_on_muscle_delete(sender, **kwargs):
+    cache.clear()
