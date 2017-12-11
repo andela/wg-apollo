@@ -514,4 +514,7 @@ class ExerciseComment(models.Model):
 
 @receiver(post_delete, sender=Muscle)
 def reset_cache_on_muscle_delete(sender, **kwargs):
+    '''
+    Reset the cache when a muscle is deleted
+    '''
     cache.clear()
