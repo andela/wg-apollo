@@ -35,6 +35,8 @@ from django.core.validators import MinLengthValidator
 from django.conf import settings
 
 from wger.core.models import Language
+# from wger.config.models import LanguageConfig
+# from wger.utils.language import load_item_languages
 from wger.utils.helpers import smart_capitalize
 from wger.utils.managers import SubmissionManager
 from wger.utils.models import AbstractLicenseModel, AbstractSubmissionModel
