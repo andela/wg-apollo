@@ -475,6 +475,52 @@ class ExercisesCacheTestCase(WorkoutManagerTestCase):
         else:
             self.assertNotEqual(old_exercise_overview_mobile, new_exercise_overview_mobile)
 
+    def test_exercise_cache_resets_muscle_delete(self):
+        '''
+        Tests if the cache for exercises is reset after a muscle has been deleted
+        '''
+        # Set user rights to admin
+        self.user_login('admin')
+
+        # Add a muscle
+        new_muscle = Muscle
+        url = 'exercise:muscle:add'
+        data = {'name': 'A new muscle',
+                'is_front': True}
+
+        # Add an exercise
+        count_before = Exercise.objects.count()
+        description = 'a nice, long and accurate description for the exercise'
+        response = self.client.post(reverse('exercise:exercise:add'),
+                                    {'category': 2,
+                                     'name_original': 'my new exercise',
+                                     'license': 1,
+                                     'description': description,
+                                     'muscles': [1, 2, 3]})
+        count_after = Exercise.objects.count()
+        self.assertEqual(response.status_code, 302)
+        new_location = response['Location']
+        self.assertEqual(count_before + 1, count_after, 'Exercise was not added')
+
+        response = self.client.get(new_location)
+        exercise_id = response.context['exercise'].id
+
+        # Exercise was saved
+        exercise = Exercise.objects.get(pk=exercise_id)
+        self.assertEqual(exercise.license_author, 'testserver')
+        self.assertEqual(exercise.status, Exercise.STATUS_ACCEPTED)
+
+        response = self.client.get(reverse('exercise:exercise:view', kwargs={'id': exercise_id}))
+        self.assertEqual(response.status_code, 200)
+
+        # Delete a muscle
+        object_class = Muscle
+        url = 'exercise:muscle:delete'
+        pk = 3
+
+        # Assert exercise cache is cleared
+        self.assertEqual(None, cache.get(cache_mapper.get_exercise_muscle_bg_key(2)))
+
 
 class WorkoutCacheTestCase(WorkoutManagerTestCase):
     '''
