@@ -479,7 +479,7 @@ class ExercisesCacheTestCase(WorkoutManagerTestCase):
         '''
         Tests if the cache for exercises is reset after a muscle has been deleted
         '''
-        # Populate exercise cache
+        # Populate exercise cache with a muscle key
         self.client.get(reverse('exercise:exercise:view', kwargs={'id': 2}))
 
         # Assert exercise cache contains a muscle key
