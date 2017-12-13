@@ -30,6 +30,7 @@ from django.forms import (
     DecimalField,
     CharField,
     widgets,
+    FileField,
     ModelChoiceField
 )
 
@@ -69,10 +70,16 @@ class WorkoutForm(ModelForm):
         model = Workout
         exclude = ('user',)
 
+
 class WorkoutExportForm(Form):
     name = CharField(max_length=100,
                         help_text=_('Give a title to your workout export'),
                         required=False)
+
+
+class WorkoutImportForm(Form):
+    file_to_import = FileField(help_text=_('Select a workout file to import'), required=False)
+
 
 class WorkoutCopyForm(Form):
     comment = CharField(max_length=100,
