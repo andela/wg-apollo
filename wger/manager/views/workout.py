@@ -17,7 +17,7 @@
 import logging
 import uuid
 import datetime
-# import json
+import json
 
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
@@ -44,7 +44,8 @@ from wger.manager.forms import (
     WorkoutForm,
     WorkoutSessionHiddenFieldsForm,
     WorkoutCopyForm,
-    WorkoutExportForm
+    WorkoutExportForm,
+    WorkoutImportForm
 )
 from wger.utils.generic_views import (
     WgerFormMixin,
@@ -123,6 +124,7 @@ def view(request, pk):
 
     return render(request, 'workout/view.html', template_data)
 
+
 def export(request, pk):
     '''
     Exports a single workout
@@ -162,6 +164,7 @@ def export(request, pk):
 
         return render(request, 'workout/export.html', template_data)
 
+
 def export_all(request):
     '''
     Exports all workouts
@@ -200,6 +203,89 @@ def export_all(request):
         template_data['extend_template'] = 'base_empty.html' if request.is_ajax() else 'base.html'
 
         return render(request, 'workout/export.html', template_data)
+
+
+def importWorkout(request):
+    '''
+    Import a workout
+    '''
+    is_owner = user = request.user
+
+    if not is_owner and not user.userprofile.ro_access:
+        return HttpResponseForbidden()
+
+    # Process request
+    if request.method == 'POST':
+        workout_form = WorkoutImportForm(request.POST, request.FILES)
+
+        if workout_form.is_valid():
+            import_file = request.FILES['file_to_import']
+            data1 = json.load(import_file) # de-serialises it
+            for a_workout in data1:
+                print(a_workout['pk'])
+                workout = get_object_or_404(Workout, pk=a_workout['pk'])
+                # export workout
+                days = workout.day_set.all()
+
+                workout_export = workout
+                workout_export.pk = None
+                workout_export.comment = ''
+                workout_export.user = request.user
+                workout_export.save()
+
+                # export the days
+                for day in days:
+                    sets = day.set_set.all()
+
+                    day_export = day
+                    days_of_week = [i for i in day.day.all()]
+                    day_export.pk = None
+                    day_export.training = workout_export
+                    day_export.save()
+                    for i in days_of_week:
+                        day_export.day.add(i)
+                    day_export.save()
+
+                    # export the sets
+                    for current_set in sets:
+                        current_set_id = current_set.id
+                        exercises = current_set.exercises.all()
+
+                        current_set_export = current_set
+                        current_set_export.pk = None
+                        current_set_export.exerciseday = day_export
+                        current_set_export.save()
+
+                        # Exercises has many-to-many relationship
+                        current_set_export.exercises = exercises
+
+                        # Go through the exercises
+                        for exercise in exercises:
+                            settings = exercise.setting_set.filter(set_id=current_set_id)
+
+                            # Copy the settings
+                            for setting in settings:
+                                setting_export = setting
+                                setting_export.pk = None
+                                setting_export.set = current_set_export
+                                setting_export.save()
+
+            return HttpResponseRedirect(reverse('manager:workout:overview'))
+        return HttpResponseRedirect(reverse('manager:workout:importWorkout'))
+
+    else:
+        workout_import_form = WorkoutImportForm()
+
+        template_data = {}
+        template_data.update(csrf(request))
+        template_data['title'] = _('Import Workout')
+        template_data['form'] = workout_import_form
+        template_data['form_action'] = reverse('manager:workout:importWorkout')
+        template_data['submit_text'] = _('Import')
+        template_data['extend_template'] = 'base_empty.html' if request.is_ajax() else 'base.html'
+
+        return render(request, 'workout/import.html', template_data)
+
 
 @login_required
 def copy_workout(request, pk):
