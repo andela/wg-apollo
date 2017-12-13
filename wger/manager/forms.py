@@ -69,6 +69,10 @@ class WorkoutForm(ModelForm):
         model = Workout
         exclude = ('user',)
 
+class WorkoutExportForm(Form):
+    name = CharField(max_length=100,
+                        help_text=_('Give a title to your workout export'),
+                        required=False)
 
 class WorkoutCopyForm(Form):
     comment = CharField(max_length=100,
