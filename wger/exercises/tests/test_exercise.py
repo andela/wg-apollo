@@ -486,7 +486,7 @@ class ExercisesCacheTestCase(WorkoutManagerTestCase):
         self.assertTrue(cache.get(cache_mapper.get_exercise_muscle_bg_key(2)),
                         msg="Cache should contain a muscle key")
 
-        # Delete a muscle from exercise
+        # Delete a muscle associated with the exercise
         Exercise.objects.get(pk=2).muscles.all()[0].delete()
 
         # Assert exercise cache is cleared
