@@ -28,6 +28,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.views.generic import DeleteView, UpdateView
 from django.core import serializers
+from django.contrib import messages
 
 from wger.core.models import (
     RepetitionUnit,
@@ -147,6 +148,7 @@ def export(request, pk):
             data = serializers.serialize('json', Workout.objects.filter(pk=pk))
             response = HttpResponse(data, content_type='application/force-download')
             response['Content-Disposition'] = 'attachment; filename="{}.json"'.format(export_name)
+            messages.success(request, _('A workout has been exported'))
 
             return response
 
@@ -187,6 +189,7 @@ def export_all(request):
             data = serializers.serialize('json', Workout.objects.filter(user=request.user))
             response = HttpResponse(data, content_type='application/force-download')
             response['Content-Disposition'] = 'attachment; filename="{}.json"'.format(export_name)
+            messages.success(request, _('Workouts have been exported'))
 
             return response
 
@@ -269,6 +272,8 @@ def importWorkout(request):
                                 setting_export.pk = None
                                 setting_export.set = current_set_export
                                 setting_export.save()
+
+            messages.success(request, _('A workout has been imported'))
 
             return HttpResponseRedirect(reverse('manager:workout:overview'))
         return HttpResponseRedirect(reverse('manager:workout:importWorkout'))
