@@ -22,7 +22,6 @@ from django.template.context_processors import csrf
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _, ugettext_lazy
 from django.utils import translation
-from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as django_login
 from django.contrib.auth import logout as django_logout
@@ -37,10 +36,10 @@ from django.views.generic import (
     ListView
 )
 from django.conf import settings
+from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from rest_framework.authtoken.models import Token
 
 from wger.utils.constants import USER_TAB
-from wger.utils.generic_views import WgerFormMixin, WgerMultiplePermissionRequiredMixin
 from wger.utils.user_agents import check_request_amazon, check_request_android
 from wger.core.forms import (
     UserPreferencesForm,
@@ -63,6 +62,14 @@ from wger.gym.models import (
     GymUserConfig,
     Contract
 )
+from wger.utils.generic_views import WgerFormMixin, WgerMultiplePermissionRequiredMixin
+
+from fitbit import FitbitOauth2Client
+import os
+import requests
+import datetime
+import six
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -230,7 +237,8 @@ def registration(request):
             user.save()
 
             # Pre-set some values of the user's profile
-            language = Language.objects.get(short_name=translation.get_language())
+            language = Language.objects.get(
+                short_name=translation.get_language())
             user.userprofile.notification_language = language
 
             # Set default gym, if needed
@@ -275,7 +283,8 @@ def preferences(request):
     # Process the preferences form
     if request.method == 'POST':
 
-        form = UserPreferencesForm(data=request.POST, instance=request.user.userprofile)
+        form = UserPreferencesForm(
+            data=request.POST, instance=request.user.userprofile)
         form.user = request.user
 
         # Save the data if it validates
@@ -287,7 +296,8 @@ def preferences(request):
 
     # Process the email form
     if request.method == 'POST':
-        email_form = UserPersonalInformationForm(data=request.POST, instance=request.user)
+        email_form = UserPersonalInformationForm(
+            data=request.POST, instance=request.user)
 
         if email_form.is_valid() and redirect:
             email_form.save()
@@ -307,6 +317,97 @@ def preferences(request):
         return render(request, 'user/preferences.html', template_data)
 
 
+def b64encode(data):
+    if six.PY3:
+        data = data.encode('utf-8')
+    content = base64.b64encode(data).decode('utf-8')
+    return content
+
+
+@login_required
+def fitbit_data_sync(request, code=None):
+    """
+    Syncs user data from fitbit
+    """
+    template_data = {}
+    client_id = os.getenv('FITAPP_CONSUMER_KEY')
+    client_secret = os.getenv('FITAPP_CONSUMER_SECRET')
+    redirect_url = os.getenv('FITAPP_REDIRECT_URL')
+
+    fitbit_client = FitbitOauth2Client(client_id, client_secret)
+
+    # get token from fitbit
+    if 'code' in request.GET:
+        code = request.GET.get("code", "")
+        form = {
+            'client_secret': client_secret,
+            'code': code,
+            'client_id': client_id,
+            'grant_type': 'authorization_code',
+            'redirect_uri': redirect_url
+        }
+
+        # encode the client id to base64
+        encoded_client_dets = b64encode(
+            os.getenv('FITAPP_CONSUMER_KEY') + ':' + os.getenv('FITAPP_CONSUMER_SECRET'))
+
+        # format authorization header as per fitbit guidelines
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Basic ' + encoded_client_dets
+        }
+
+        # get user weight data from fitbit
+        response = requests.post(
+            fitbit_client.request_token_url, form, headers=headers).json()
+
+        if "access_token" in response:
+            token = response['access_token']
+            user_id = response['user_id']
+            headers['Authorization'] = 'Bearer ' + token
+
+            if 'weight' in response['scope']:
+                period = "30d"
+                end_date = datetime.datetime.today().strftime('%Y-%m-%d')
+
+                uri = user_id + '/body/log/weight/date/{}/{}.json'.format(
+                    end_date, period)
+                response_weight = requests.get(
+                    'https://api.fitbit.com/1/user/' + uri,
+                    headers=headers)
+
+                weight = response_weight.json()['weight']
+                try:
+                    for w in weight:
+                        entry = WeightEntry()
+                        entry.weight = w['weight']
+                        entry.user = request.user
+                        entry.date = datetime.datetime.strptime(
+                            w['date'], '%Y-%m-%d')
+                        entry.save()
+
+                    messages.success(request, _(
+                        'Successfully synced weight data.'))
+
+                except Exception as error:
+                    if "UNIQUE constraint failed" in str(error):
+                        messages.info(request, _(
+                            'Already synced weight data.'))
+                    else:
+                        messages.warning(request, _(
+                            'Could not sync the weight data.'))
+
+        else:
+            messages.warning(request, _('Something went wrong.'))
+
+    # redirect back to app
+    template_data['fitbit_auth_link'] = \
+        fitbit_client.authorize_token_url(
+            redirect_uri=redirect_url,
+            prompt='consent')[0]
+    return render(request, 'user/fitbit.html', template_data)
+
+
 class UserDeactivateView(LoginRequiredMixin,
                          WgerMultiplePermissionRequiredMixin,
                          RedirectView):
@@ -315,7 +416,8 @@ class UserDeactivateView(LoginRequiredMixin,
     '''
     permanent = False
     model = User
-    permission_required = ('gym.manage_gym', 'gym.manage_gyms', 'gym.gym_trainer')
+    permission_required = (
+        'gym.manage_gym', 'gym.manage_gyms', 'gym.gym_trainer')
 
     def dispatch(self, request, *args, **kwargs):
         '''
@@ -336,7 +438,8 @@ class UserDeactivateView(LoginRequiredMixin,
         edit_user = get_object_or_404(User, pk=pk)
         edit_user.is_active = False
         edit_user.save()
-        messages.success(self.request, _('The user was successfully deactivated'))
+        messages.success(self.request, _(
+            'The user was successfully deactivated'))
         return reverse('core:user:overview', kwargs=({'pk': pk}))
 
 
@@ -348,7 +451,8 @@ class UserActivateView(LoginRequiredMixin,
     '''
     permanent = False
     model = User
-    permission_required = ('gym.manage_gym', 'gym.manage_gyms', 'gym.gym_trainer')
+    permission_required = (
+        'gym.manage_gym', 'gym.manage_gyms', 'gym.gym_trainer')
 
     def dispatch(self, request, *args, **kwargs):
         '''
@@ -369,7 +473,8 @@ class UserActivateView(LoginRequiredMixin,
         edit_user = get_object_or_404(User, pk=pk)
         edit_user.is_active = True
         edit_user.save()
-        messages.success(self.request, _('The user was successfully activated'))
+        messages.success(self.request, _(
+            'The user was successfully activated'))
         return reverse('core:user:overview', kwargs=({'pk': pk}))
 
 
@@ -412,7 +517,8 @@ class UserEditView(WgerFormMixin,
         Send some additional data to the template
         '''
         context = super(UserEditView, self).get_context_data(**kwargs)
-        context['form_action'] = reverse('core:user:edit', kwargs={'pk': self.object.id})
+        context['form_action'] = reverse(
+            'core:user:edit', kwargs={'pk': self.object.id})
         context['title'] = _('Edit {0}'.format(self.object))
         return context
 
@@ -449,7 +555,8 @@ class UserDetailView(LoginRequiredMixin, WgerMultiplePermissionRequiredMixin, De
     User overview for gyms
     '''
     model = User
-    permission_required = ('gym.manage_gym', 'gym.manage_gyms', 'gym.gym_trainer')
+    permission_required = (
+        'gym.manage_gym', 'gym.manage_gyms', 'gym.gym_trainer')
     template_name = 'user/overview.html'
     context_object_name = 'current_user'
 
@@ -489,8 +596,10 @@ class UserDetailView(LoginRequiredMixin, WgerMultiplePermissionRequiredMixin, De
             .order_by('-date')[:5]
         context['nutrition_plans'] = NutritionPlan.objects.filter(user=self.object) \
             .order_by('-creation_date')[:5]
-        context['session'] = WorkoutSession.objects.filter(user=self.object).order_by('-date')[:10]
-        context['admin_notes'] = AdminUserNote.objects.filter(member=self.object)[:5]
+        context['session'] = WorkoutSession.objects.filter(
+            user=self.object).order_by('-date')[:10]
+        context['admin_notes'] = AdminUserNote.objects.filter(member=self.object)[
+            :5]
         context['contracts'] = Contract.objects.filter(member=self.object)[:5]
         return context
 
