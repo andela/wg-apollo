@@ -132,23 +132,23 @@ class DayCreateView(DayView, CreateView):
                     already_selected_option_names.append(option.day_of_week)
         if 'Microcycle' in workout.cycle:
             context['form'].fields['day'].label = 'Day'
-            context['form'].fields['description'].help_text = _('A description of what is done on this day (e.g. '
-                                    '"Pull day") or what body parts are trained (e.g. '
-                                    '"Arms and abs")')
+            context['form'].fields['description'].help_text = \
+            _('A description of what is done on this day (e.g. "Pull day") '
+              ' what body parts are trained (e.g. "Arms and abs")')
             context['form'].fields['day'].queryset = DaysOfWeek.objects.filter(
                 plan_type='day').exclude(day_of_week__in=already_selected_option_names)
         elif 'Mesocycle' in workout.cycle:
-            context['form'].fields['description'].help_text = _('A description of what is done on this week (e.g. '
-                                               '"Pull week") or what body parts are trained (e.g. '
-                                               '"Arms and abs")')
+            context['form'].fields['description'].help_text = \
+            _('A description of what is done on this week (e.g. '
+              '"Pull week") or what body parts are trained (e.g. "Arms and abs")')
             context['form'].fields['day'].label = 'Week'
             context['form'].fields['day'].queryset = DaysOfWeek.objects.filter(
                 plan_type='week').exclude(day_of_week__in=already_selected_option_names)
         elif 'Macrocycle' in workout.cycle:
             context['form'].fields['day'].label = 'Month'
-            context['form'].fields['description'].help_text = _('A description of what is done on this month (e.g. '
-                                    '"Pull month") or what body parts are trained (e.g. '
-                                    '"Arms and abs")')
+            context['form'].fields['description'].help_text = \
+            _('A description of what is done on this month (e.g. '
+              '"Pull month") or what body parts are trained (e.g. "Arms and abs")')
             context['form'].fields['day'].queryset = DaysOfWeek.objects.filter(
                 plan_type='month').exclude(day_of_week__in=already_selected_option_names)
         context['form_action'] = reverse('manager:day:add',
