@@ -19,6 +19,10 @@ django-sortedm2m
 django-bower
 invoke
 requests
+whitenoise
+gunicorn
+psycopg2
+
 
 # REST API
 djangorestframework>=3.2,<3.3
