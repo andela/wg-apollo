@@ -44,6 +44,9 @@ from wger.utils.cache import (
     cache_mapper
 )
 
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+
 
 logger = logging.getLogger(__name__)
 
@@ -428,10 +431,10 @@ class ExerciseImage(AbstractSubmissionModel, AbstractLicenseModel, models.Model)
                 .filter(is_main=False) \
                 .count():
 
-                image = ExerciseImage.objects.accepted() \
-                    .filter(exercise=self.exercise, is_main=False)[0]
-                image.is_main = True
-                image.save()
+            image = ExerciseImage.objects.accepted() \
+                .filter(exercise=self.exercise, is_main=False)[0]
+            image.is_main = True
+            image.save()
 
     def get_owner_object(self):
         '''
@@ -505,3 +508,11 @@ class ExerciseComment(models.Model):
         Comment has no owner information
         '''
         return False
+
+
+@receiver(post_delete, sender=Muscle)
+def reset_cache_on_muscle_delete(sender, **kwargs):
+    '''
+    Reset the cache when a muscle is deleted
+    '''
+    cache.clear()

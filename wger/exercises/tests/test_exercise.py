@@ -475,6 +475,24 @@ class ExercisesCacheTestCase(WorkoutManagerTestCase):
         else:
             self.assertNotEqual(old_exercise_overview_mobile, new_exercise_overview_mobile)
 
+    def test_exercise_cache_resets_muscle_delete(self):
+        '''
+        Tests if the cache for exercises is reset after a muscle has been deleted
+        '''
+        # Populate exercise cache with a muscle key
+        self.client.get(reverse('exercise:exercise:view', kwargs={'id': 2}))
+
+        # Assert exercise cache contains a muscle key
+        self.assertTrue(cache.get(cache_mapper.get_exercise_muscle_bg_key(2)),
+                        msg="Cache should contain a muscle key")
+
+        # Delete a muscle associated with the exercise
+        Exercise.objects.get(pk=2).muscles.all()[0].delete()
+
+        # Assert exercise cache is cleared
+        self.assertFalse(cache.get(cache_mapper.get_exercise_muscle_bg_key(2)),
+                         msg="Cache should be cleared when a muscle is deleted")
+
 
 class WorkoutCacheTestCase(WorkoutManagerTestCase):
     '''
@@ -510,24 +528,3 @@ class WorkoutCacheTestCase(WorkoutManagerTestCase):
         exercise.delete()
         for workout_id in workout_ids:
             self.assertFalse(cache.get(cache_mapper.get_workout_canonical(workout_id)))
-
-
-# TODO: fix test, all registered users can upload exercises
-# class ExerciseApiTestCase(api_base_test.ApiBaseResourceTestCase):
-#     '''
-#     Tests the exercise overview resource
-#     '''
-#     pk = 1
-#     resource = Exercise
-#     private_resource = False
-#     data = {"category": "1",
-#             "comments": [],
-#             "creation_date": "2013-01-01",
-#             "description": "Something here",
-#             "id": 1,
-#             "language": "2",
-#             "muscles": [
-#                 "1"
-#             ],
-#             "name": "foobar",
-#             "status": "5"}
