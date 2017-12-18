@@ -73,8 +73,8 @@ class WorkoutForm(ModelForm):
 
 class WorkoutExportForm(Form):
     name = CharField(max_length=100,
-                        help_text=_('Give a title to your workout export'),
-                        required=False)
+                     help_text=_('Give a title to your workout export'),
+                     required=False)
 
 
 class WorkoutImportForm(Form):
@@ -113,6 +113,7 @@ class SetFormMobile(ModelForm):
     '''
     Don't use the auto completer when accessing the mobile version
     '''
+
     class Meta:
         model = Set
         exclude = ('order', 'exerciseday')
@@ -170,13 +171,14 @@ class WorkoutLogForm(ModelForm):
 
     class Meta:
         model = WorkoutLog
-        exclude = ('workout', )
+        exclude = ('workout',)
 
 
 class HelperWorkoutSessionForm(ModelForm):
     '''
     A helper form used in the workout log view
     '''
+
     class Meta:
         model = WorkoutSession
         exclude = ('user', 'workout', 'date')
@@ -186,6 +188,7 @@ class WorkoutSessionForm(ModelForm):
     '''
     Workout Session form
     '''
+
     class Meta:
         model = WorkoutSession
         exclude = ('user', 'workout', 'date')
@@ -195,6 +198,7 @@ class WorkoutSessionHiddenFieldsForm(ModelForm):
     '''
     Workout Session form used in the timer view
     '''
+
     class Meta:
         model = WorkoutSession
         exclude = []
