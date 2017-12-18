@@ -43,7 +43,7 @@ SITE_URL = 'http://localhost:8000'
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-MEDIA_ROOT = os.path.join(PROJECT_DIR, '../media')
+MEDIA_ROOT = os.path.join(PROJECT_DIR, 'media')
 MEDIA_URL = '/media/'
 
 # Allow all hosts to access the application. Change if used in production.
@@ -63,4 +63,4 @@ WGER_SETTINGS['EMAIL_FROM'] = 'wger Workout Manager <wger@example.com>'
 # WGER_SETTINGS['TWITTER'] = ''
 
 # Static files directory
-STATIC_ROOT = os.path.join(PROJECT_DIR, '../static')
+STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
