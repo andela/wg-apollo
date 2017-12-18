@@ -243,3 +243,15 @@ class WorkoutExportSingleWorkOut(WorkoutManagerTestCase):
         self.user_login()
         response = self.client.get(reverse('manager:workout:export_all'))
         self.assertEqual(response.status_code, 200)
+
+    def test_import_page(self):
+        """
+        Test that the import work out page is displayed and that it contains a form with the
+        input below in its body.
+        :return:
+        """
+        self.user_login()
+        response = self.client.get(reverse('manager:workout:importWorkout'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'<input type="submit" value="Import" id="form-save" '
+                      b'class="btn btn-default btn-block">', response.content)
