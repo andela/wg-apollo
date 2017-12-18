@@ -14,6 +14,7 @@
 
 import datetime
 
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
 from wger.core.tests import api_base_test
@@ -200,3 +201,45 @@ class WorkoutApiTestCase(api_base_test.ApiBaseResourceTestCase):
     private_resource = True
     special_endpoints = ('canonical_representation',)
     data = {'comment': 'A new comment'}
+
+
+class WorkoutExportSingleWorkOut(WorkoutManagerTestCase):
+    '''
+    Test single workout export
+    '''
+    def test_single_workout_export(self):
+        self.user_login()
+        user = User.objects.get(username=self.current_user)
+        workout = Workout()
+        workout.user = user
+        workout.save()
+        response = self.client.post(reverse('manager:workout:export', kwargs={'pk': user.pk}))
+        self.assertEqual(response['Content-Type'], "application/force-download")
+        self.assertEqual(response['Content-Disposition'], 'attachment; filename="workout.json"')
+        self.assertEqual(response.status_code, 200)
+
+    def test_single_workout_page(self):
+        """
+        Test that the work out export page displays on a Get request
+        :return:
+        """
+        self.user_login()
+        user = User.objects.get(username=self.current_user)
+        response = self.client.get(reverse('manager:workout:export', kwargs={'pk': user.pk}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_all_workout_export(self):
+        self.user_login()
+        user = User.objects.get(username=self.current_user)
+        workout = Workout()
+        workout.user = user
+        workout.save()
+        response = self.client.post(reverse('manager:workout:export_all'))
+        self.assertEqual(response['Content-Type'], "application/force-download")
+        self.assertEqual(response['Content-Disposition'], 'attachment; filename="workouts.json"')
+        self.assertEqual(response.status_code, 200)
+
+    def test_all_workout_page(self):
+        self.user_login()
+        response = self.client.get(reverse('manager:workout:export_all'))
+        self.assertEqual(response.status_code, 200)
