@@ -41,6 +41,8 @@ SITE_URL = 'http://localhost:8000'
 
 # Path to uploaded files
 # Absolute filesystem path to the directory that will hold user-uploaded files.
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
@@ -72,4 +74,4 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'nutrition', 'static'),
     os.path.join(BASE_DIR, 'weight', 'static'),
 )
-
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
