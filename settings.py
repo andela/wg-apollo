@@ -67,9 +67,9 @@ STATIC_URL = '/static/'
 
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'wger', 'core', 'static'),
-    os.path.join(BASE_DIR, 'wger', 'exercises', 'static'),
-    os.path.join(BASE_DIR, 'wger', 'nutrition', 'static'),
-    os.path.join(BASE_DIR, 'wger', 'weight', 'static'),
+    os.path.join(BASE_DIR, 'core', 'static'),
+    os.path.join(BASE_DIR, 'exercises', 'static'),
+    os.path.join(BASE_DIR, 'nutrition', 'static'),
+    os.path.join(BASE_DIR, 'weight', 'static'),
 )
 
