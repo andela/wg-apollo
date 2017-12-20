@@ -135,7 +135,7 @@ class DeleteTestWorkoutTestCase(WorkoutManagerDeleteTestCase):
     user_fail = 'admin'
 
 
-class EditWorkoutTestCase(WorkoutManagerEditTestCase):
+class EditWorkoutMacrocycleTestCase(WorkoutManagerEditTestCase):
     '''
     Tests editing a Workout
     '''
@@ -145,7 +145,19 @@ class EditWorkoutTestCase(WorkoutManagerEditTestCase):
     pk = 3
     user_success = 'test'
     user_fail = 'admin'
-    data = {'comment': 'A new comment', 'cycle': 'Microcycle'}
+    data = {'comment': 'A new comment', 'cycle': 'Macrocycle'}
+
+class EditWorkoutMesocycleTestCase(WorkoutManagerEditTestCase):
+    '''
+    Tests editing a Workout
+    '''
+
+    object_class = Workout
+    url = 'manager:workout:edit'
+    pk = 3
+    user_success = 'test'
+    user_fail = 'admin'
+    data = {'comment': 'A new comment', 'cycle': 'Mesocycle'}
 
 
 class WorkoutOverviewTestCase(WorkoutManagerTestCase):
