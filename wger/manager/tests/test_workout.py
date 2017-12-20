@@ -22,6 +22,7 @@ from wger.core.tests.base_testcase import WorkoutManagerDeleteTestCase
 from wger.core.tests.base_testcase import WorkoutManagerEditTestCase
 from wger.core.tests.base_testcase import WorkoutManagerTestCase
 from wger.manager.models import Workout
+import os
 
 
 class WorkoutShareButtonTestCase(WorkoutManagerTestCase):
@@ -257,8 +258,10 @@ class WorkoutExportSingleWorkOut(WorkoutManagerTestCase):
                       b'class="btn btn-default btn-block">', response.content)
         # test a form submit
         TEST_ROOT = os.path.abspath(os.path.dirname(__file__))
-        response = self.client.post(reverse('manager:workout:importWorkout'),
-                                    data={
-                                        'file_to_import': open(os.path.join(TEST_ROOT, 'workout.json'))
-                                    })
+        response = self.client.post(
+            reverse('manager:workout:importWorkout'),
+            data={
+                'file_to_import': open(os.path.join(TEST_ROOT, 'workout.json'))
+            }
+        )
         self.assertEqual(response.status_code, 302)
