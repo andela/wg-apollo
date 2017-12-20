@@ -147,6 +147,7 @@ class EditWorkoutMacrocycleTestCase(WorkoutManagerEditTestCase):
     user_fail = 'admin'
     data = {'comment': 'A new comment', 'cycle': 'Macrocycle'}
 
+
 class EditWorkoutMesocycleTestCase(WorkoutManagerEditTestCase):
     '''
     Tests editing a Workout
