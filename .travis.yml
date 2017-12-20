@@ -21,10 +21,10 @@ python:
 # Manually define here the combinations environment variables to test
 # https://github.com/travis-ci/travis-ci/issues/1519
 env:
-  - TEST_MOBILE=True  DB=postgresql TRAVIS_NODE_VERSION="4"
-  - TEST_MOBILE=True  DB=sqlite     TRAVIS_NODE_VERSION="4"
-  - TEST_MOBILE=False DB=postgresql TRAVIS_NODE_VERSION="4"
-  - TEST_MOBILE=False DB=sqlite     TRAVIS_NODE_VERSION="4"
+  - TEST_MOBILE=True  DB=postgresql TRAVIS_NODE_VERSION="4" DB_NAME='test_wger' DB_USER='postgres' DB_USER_PASSWORD='' HOST='localhost' DB_PORT_NUMBER=5432 ENGINE='django.db.backends.postgresql'
+  - TEST_MOBILE=True  DB=sqlite     TRAVIS_NODE_VERSION="4" DB_NAME='/home/travis/.local/share/wger/database.sqlite' DB_USER='' DB_USER_PASSWORD='' HOST='localhost' DB_PORT_NUMBER=5432 ENGINE='django.db.backends.sqlite3'
+  - TEST_MOBILE=False DB=postgresql TRAVIS_NODE_VERSION="4" DB_NAME='test_wger' DB_USER='postgres' DB_USER_PASSWORD='' HOST='localhost' DB_PORT_NUMBER=5432 ENGINE='django.db.backends.postgresql'
+  - TEST_MOBILE=False DB=sqlite     TRAVIS_NODE_VERSION="4" DB_NAME='/home/travis/.local/share/wger/database.sqlite' DB_USER='' DB_USER_PASSWORD='' HOST='localhost' DB_PORT_NUMBER=5432 ENGINE='django.db.backends.sqlite3'
 
 # Install the application
 install:
