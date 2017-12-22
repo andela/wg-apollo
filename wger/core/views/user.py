@@ -384,7 +384,10 @@ def fitbit_data_sync(request, code=None):
                         entry.user = request.user
                         entry.date = datetime.datetime.strptime(
                             w['date'], '%Y-%m-%d')
-                        entry.save()
+                        try:
+                            entry.save()
+                        except Exception:
+                            pass
 
                     messages.success(request, _(
                         'Successfully synced weight data.'))
